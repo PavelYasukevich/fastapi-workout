@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Optional
 from uuid import UUID
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Path
 
 from models import Gender, Role, User, UserUpdate
 
@@ -43,6 +43,14 @@ async def fetch_users():
     return db
 
 
+@app.get("/api/v1/user")
+async def get_user_by_name(name: Optional[str] = None):
+    for user in db:
+        if user.first_name == name or user.last_name == name:
+            return user
+    raise HTTPException(status_code=404, detail="User does not exist")
+
+
 @app.post("/api/v1/users")
 async def register_user(user: User):
     db.append(user)
@@ -50,14 +58,19 @@ async def register_user(user: User):
 
 
 @app.delete("/api/v1/users/{user_id}")
-async def delete_user(user_id: UUID):
+async def delete_user(
+    user_id: UUID = Path(None, description="The ID of user you want to delete")
+):
     user = get_user_or_404(user_id)
     if user is not None:
         db.remove(user)
 
 
 @app.put("/api/v1/users/{user_id}")
-async def update_user(user_id: UUID, data: UserUpdate):
+async def update_user(
+    data: UserUpdate,
+    user_id: UUID = Path(None, description="The ID of user you want to update"),
+):
     user = get_user_or_404(user_id)
     if user is not None:
         if data.first_name is not None:
