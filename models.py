@@ -1,8 +1,9 @@
+from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Gender(str, Enum):
@@ -17,7 +18,7 @@ class Role(str, Enum):
 
 
 class User(BaseModel):
-    id: Optional[UUID] = uuid4()
+    id: Optional[UUID] = Field(default_factory=uuid4)
     first_name: str
     last_name: str
     gender: Gender
@@ -28,3 +29,16 @@ class UserUpdate(BaseModel):
     first_name: Optional[str]
     last_name: Optional[str]
     roles: Optional[List[Role]]
+
+
+class Post(BaseModel):
+    id: Optional[int]
+    # author: User
+    title: str
+    content: str
+    created: datetime = Field(default_factory=datetime.utcnow)
+
+
+class PostUpdate(BaseModel):
+    title: Optional[str]
+    content: Optional[str]
