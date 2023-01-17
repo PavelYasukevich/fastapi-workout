@@ -9,4 +9,4 @@ app.include_router(UserRouter)
 
 @app.get("/")
 async def root():
-    return {"Hello": "World"}
+    return {"FastApi workout": "Project to explore features of framework."}

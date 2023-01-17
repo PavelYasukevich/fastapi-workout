@@ -7,6 +7,7 @@ from models import Gender, Role, User, UserUpdate
 
 router = APIRouter()
 
+# temporary list of users, until actual DB introduced
 db: List[User] = [
     User(
         id=UUID("6cd85769-ff5c-4ba6-8508-45f00d445e9d"),
@@ -26,6 +27,7 @@ db: List[User] = [
 
 
 def get_user_or_404(user_id):
+    """Looks if user exists in db and return user entry. Raises 404 error otherwise."""
     for user in db:
         if user.id == user_id:
             return user
@@ -36,19 +38,13 @@ def get_user_or_404(user_id):
 
 @router.get("/api/v1/users")
 async def fetch_users():
+    """Return list of users."""
     return db
-
-
-@router.get("/api/v1/user")
-async def get_user_by_name(name: Optional[str] = None):
-    for user in db:
-        if user.first_name == name or user.last_name == name:
-            return user
-    raise HTTPException(status_code=404, detail="User does not exist")
 
 
 @router.post("/api/v1/users")
 async def register_user(user: User):
+    """Add new user entry."""
     db.append(user)
     return {"id": user.id}
 
@@ -57,6 +53,7 @@ async def register_user(user: User):
 async def delete_user(
     user_id: UUID = Path(None, description="The ID of user you want to delete")
 ):
+    """Delete existing user."""
     user = get_user_or_404(user_id)
     if user is not None:
         db.remove(user)
@@ -67,6 +64,7 @@ async def update_user(
     data: UserUpdate,
     user_id: UUID = Path(None, description="The ID of user you want to update"),
 ):
+    """Update user data."""
     user = get_user_or_404(user_id)
     if user is not None:
         if data.first_name is not None:
@@ -75,3 +73,12 @@ async def update_user(
             user.last_name = data.last_name
         if data.roles is not None:
             user.roles = data.roles
+
+
+# Function to test query parameters usage
+@router.get("/api/v1/user")
+async def get_user_by_name(name: Optional[str] = None):
+    for user in db:
+        if user.first_name == name or user.last_name == name:
+            return user
+    raise HTTPException(status_code=404, detail="User does not exist")
