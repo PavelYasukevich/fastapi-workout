@@ -1,7 +1,7 @@
 from typing import List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, HTTPException, Path, status
 
 from models import Gender, Role, User, UserUpdate
 
@@ -32,24 +32,25 @@ def get_user_or_404(user_id):
         if user.id == user_id:
             return user
     raise HTTPException(
-        status_code=404, detail=f"user with id: {user_id} does not exist"
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"user with id: {user_id} does not exist",
     )
 
 
-@router.get("/api/v1/users")
-async def fetch_users():
+@router.get("/api/v1/users", response_model=List[User])
+async def fetch_users() -> List[User]:
     """Return list of users."""
     return db
 
 
-@router.post("/api/v1/users")
-async def register_user(user: User):
+@router.post("/api/v1/users", response_model=User, status_code=status.HTTP_201_CREATED)
+async def register_user(user: User) -> User:
     """Add new user entry."""
     db.append(user)
-    return {"id": user.id}
+    return user
 
 
-@router.delete("/api/v1/users/{user_id}")
+@router.delete("/api/v1/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
     user_id: UUID = Path(None, description="The ID of user you want to delete")
 ):
@@ -59,11 +60,11 @@ async def delete_user(
         db.remove(user)
 
 
-@router.put("/api/v1/users/{user_id}")
+@router.put("/api/v1/users/{user_id}", response_model=User)
 async def update_user(
     data: UserUpdate,
     user_id: UUID = Path(None, description="The ID of user you want to update"),
-):
+) -> User:
     """Update user data."""
     user = get_user_or_404(user_id)
     if user is not None:
@@ -73,6 +74,7 @@ async def update_user(
             user.last_name = data.last_name
         if data.roles is not None:
             user.roles = data.roles
+    return user
 
 
 # Function to test query parameters usage
