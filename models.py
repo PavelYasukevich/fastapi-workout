@@ -7,14 +7,14 @@ from pydantic import BaseModel, Field
 
 
 class Gender(str, Enum):
-    male = 'male'
-    female = 'female'
+    male = "male"
+    female = "female"
 
 
 class Role(str, Enum):
-    admin = 'admin'
-    student = 'student'
-    user = 'user'
+    admin = "admin"
+    student = "student"
+    user = "user"
 
 
 class User(BaseModel):
@@ -36,9 +36,11 @@ class Post(BaseModel):
     # author: User
     title: str
     content: str
-    created: datetime = Field(default_factory=datetime.utcnow)
+    published: bool = True
+    created_at: Optional[datetime]
 
 
 class PostUpdate(BaseModel):
     title: Optional[str]
     content: Optional[str]
+    published: Optional[bool]
