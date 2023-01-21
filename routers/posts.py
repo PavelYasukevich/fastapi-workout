@@ -15,11 +15,11 @@ router = APIRouter()
 
 def connect():
     """Connect to database"""
-    DBNAME = os.environ.get("DBNAME")
+    DB_NAME = os.environ.get("DB_NAME")
     DB_USER = os.environ.get("DB_USER")
 
     try:
-        conn = psycopg.connect(f"dbname={DBNAME} user={DB_USER}")
+        conn = psycopg.connect(f"dbname={DB_NAME} user={DB_USER}")
         print("Sucsessful connection to DB")
     except Exception as error:
         print(f"Failed to connect. Error: {error}")
